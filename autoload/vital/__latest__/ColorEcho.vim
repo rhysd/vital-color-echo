@@ -146,7 +146,7 @@ endfunction
 
 function! s:echo(str) abort
     if !s:is_available()
-        echo a:str
+        echo substitute(a:str, '\e[\d\+m', '', 'g')
         return
     endif
 
