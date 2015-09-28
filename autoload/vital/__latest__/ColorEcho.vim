@@ -45,29 +45,31 @@ function! s:_define_ansi_highlights() abort
     hi ansiWhiteFg ctermfg=white guifg=white cterm=none gui=none
     hi ansiGrayFg ctermfg=gray guifg=gray cterm=none gui=none
 
-    hi ansiLightBlackBg ctermbg=black guibg=black cterm=none gui=none
-    hi ansiLightRedBg ctermbg=red guibg=red cterm=none gui=none
-    hi ansiLightGreenBg ctermbg=green guibg=green cterm=none gui=none
-    hi ansiLightYellowBg ctermbg=yellow guibg=yellow cterm=none gui=none
-    hi ansiLightBlueBg ctermbg=blue guibg=blue cterm=none gui=none
-    hi ansiLightMagentaBg ctermbg=magenta guibg=magenta cterm=none gui=none
-    hi ansiLightCyanBg ctermbg=cyan guibg=cyan cterm=none gui=none
-    hi ansiLightWhiteBg ctermbg=white guibg=white cterm=none gui=none
-    hi ansiLightGrayBg ctermbg=gray guibg=gray cterm=none gui=none
+    hi ansiBoldBlackFg ctermfg=black guifg=black cterm=none gui=none cterm=bold gui=bold
+    hi ansiBoldRedFg ctermfg=red guifg=red cterm=none gui=none cterm=bold gui=bold
+    hi ansiBoldGreenFg ctermfg=green guifg=green cterm=none gui=none cterm=bold gui=bold
+    hi ansiBoldYellowFg ctermfg=yellow guifg=yellow cterm=none gui=none cterm=bold gui=bold
+    hi ansiBoldBlueFg ctermfg=blue guifg=blue cterm=none gui=none cterm=bold gui=bold
+    hi ansiBoldMagentaFg ctermfg=magenta guifg=magenta cterm=none gui=none cterm=bold gui=bold
+    hi ansiBoldCyanFg ctermfg=cyan guifg=cyan cterm=none gui=none cterm=bold gui=bold
+    hi ansiBoldWhiteFg ctermfg=white guifg=white cterm=none gui=none cterm=bold gui=bold
+    hi ansiBoldGrayFg ctermfg=gray guifg=gray cterm=none gui=none cterm=bold gui=bold
 
-    hi ansiLightBlackFg ctermfg=black guifg=black cterm=none gui=none
-    hi ansiLightRedFg ctermfg=red guifg=red cterm=none gui=none
-    hi ansiLightGreenFg ctermfg=green guifg=green cterm=none gui=none
-    hi ansiLightYellowFg ctermfg=yellow guifg=yellow cterm=none gui=none
-    hi ansiLightBlueFg ctermfg=blue guifg=blue cterm=none gui=none
-    hi ansiLightMagentaFg ctermfg=magenta guifg=magenta cterm=none gui=none
-    hi ansiLightCyanFg ctermfg=cyan guifg=cyan cterm=none gui=none
-    hi ansiLightWhiteFg ctermfg=white guifg=white cterm=none gui=none
-    hi ansiLightGrayFg ctermfg=gray guifg=gray cterm=none gui=none
+    hi ansiUnderlineBlackFg ctermfg=black guifg=black cterm=none gui=none cterm=underline gui=underline
+    hi ansiUnderlineRedFg ctermfg=red guifg=red cterm=none gui=none cterm=underline gui=underline
+    hi ansiUnderlineGreenFg ctermfg=green guifg=green cterm=none gui=none cterm=underline gui=underline
+    hi ansiUnderlineYellowFg ctermfg=yellow guifg=yellow cterm=none gui=none cterm=underline gui=underline
+    hi ansiUnderlineBlueFg ctermfg=blue guifg=blue cterm=none gui=none cterm=underline gui=underline
+    hi ansiUnderlineMagentaFg ctermfg=magenta guifg=magenta cterm=none gui=none cterm=underline gui=underline
+    hi ansiUnderlineCyanFg ctermfg=cyan guifg=cyan cterm=none gui=none cterm=underline gui=underline
+    hi ansiUnderlineWhiteFg ctermfg=white guifg=white cterm=none gui=none cterm=underline gui=underline
+    hi ansiUnderlineGrayFg ctermfg=gray guifg=gray cterm=none gui=none cterm=underline gui=underline
+
 endfunction
 
 let s:echorizer = {
         \   'value': '',
+        \   'attr': '',
         \ }
 
 function s:echorizer.eat() abort
@@ -115,7 +117,11 @@ function s:echorizer.echo_ansi(code) abort
         return
     endif
 
-    execute 'echohl' 'ansi' . s:COLORS[a:code]
+    execute 'echohl' 'ansi' . self.attr . s:COLORS[a:code]
+
+    if a:code == 0
+        self.attr = ''
+    endif
 endfunction
 
 function s:echorizer.echo() abort
@@ -131,11 +137,19 @@ function s:echorizer.echo() abort
             echon token.body
         endif
 
-        call self.echo_ansi(token.code)
+        " TODO: Now only one attribute can be specified
+        if token.code == 1
+            let self.attr = 'Bold'
+        elseif token.code == 4
+            let self.attr = 'Underline'
+        else
+            call self.echo_ansi(token.code)
+        endif
     endwhile
 
     echon self.value
     echohl None
+    let self.value = ''
 endfunction
 
 function! s:get_echorizer(str) abort
