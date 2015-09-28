@@ -73,12 +73,12 @@ let s:echorizer = {
         \ }
 
 function s:echorizer.eat() abort
-    let matched = match(self.value, '\e\[\d\+m')
+    let matched = match(self.value, '\e\[\d*m')
     if matched == -1
         return {}
     endif
 
-    let matched_end = matchend(self.value, '\e\[\d\+m')
+    let matched_end = matchend(self.value, '\e\[\d*m')
 
     let token = {
         \   'body': matched == 0 ? '' : self.value[ : matched-1],
@@ -113,14 +113,13 @@ let s:COLORS = {
 
 function s:echorizer.echo_ansi(code) abort
     if !has_key(s:COLORS, a:code)
-        echomsg 'invalid code: ' . a:code
         return
     endif
 
     execute 'echohl' 'ansi' . self.attr . s:COLORS[a:code]
 
     if a:code == 0
-        self.attr = ''
+        let self.attr = ''
     endif
 endfunction
 
@@ -142,6 +141,8 @@ function s:echorizer.echo() abort
             let self.attr = 'Bold'
         elseif token.code == 4
             let self.attr = 'Underline'
+        elseif token.code ==# ''
+            call self.echo_ansi(0)
         else
             call self.echo_ansi(token.code)
         endif
@@ -160,7 +161,7 @@ endfunction
 
 function! s:echo(str) abort
     if !s:is_available()
-        echo substitute(a:str, '\e[\d\+m', '', 'g')
+        echo substitute(a:str, '\e[.*m', '', 'g')
         return
     endif
 
